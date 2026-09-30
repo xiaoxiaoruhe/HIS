@@ -1,0 +1,8 @@
+﻿id,6882831
+apiKey,sk-ws-H.EYYHYID.j0BE.MEQCIBuMpC1PjO5lYkIVJbEO7EX7VllPQLHpgdIuVmrwlWFVAiBZn9qjpyrDjxDZ18vIBy5ACqf2j378a2YGw1tCkAOqKg
+apiHost,ws-n0f6tzstapjf57x5.cn-beijing.maas.aliyuncs.com
+openAiCompatible,https://ws-n0f6tzstapjf57x5.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+dashScope,https://ws-n0f6tzstapjf57x5.cn-beijing.maas.aliyuncs.com/api/v1
+description,创建apikey
+workspaceName,默认业务空间
+workspaceId,ws-n0f6tzstapjf57x5

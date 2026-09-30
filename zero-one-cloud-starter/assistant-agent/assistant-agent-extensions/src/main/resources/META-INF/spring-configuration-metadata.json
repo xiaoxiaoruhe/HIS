@@ -1,0 +1,47 @@
+{
+  "properties": [
+    {
+      "name": "spring.ai.alibaba.codeact.extension.search.enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用搜索扩展",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.ai.alibaba.codeact.extension.search.project-search-enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用项目上下文搜索",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.ai.alibaba.codeact.extension.search.knowledge-search-enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用知识库搜索",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.ai.alibaba.codeact.extension.search.web-search-enabled",
+      "type": "java.lang.Boolean",
+      "description": "是否启用Web搜索（百度搜索）",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.ai.alibaba.codeact.extension.search.default-top-k",
+      "type": "java.lang.Integer",
+      "description": "默认返回结果数量",
+      "defaultValue": 10
+    },
+    {
+      "name": "spring.ai.alibaba.codeact.extension.search.search-timeout-ms",
+      "type": "java.lang.Long",
+      "description": "搜索超时时间（毫秒）",
+      "defaultValue": 5000
+    },
+    {
+      "name": "spring.ai.alibaba.codeact.extension.search.baidu-api-key",
+      "type": "java.lang.String",
+      "description": "百度搜索API密钥（可选，如果不配置则使用简单模式）",
+      "defaultValue": null
+    }
+  ]
+}
+

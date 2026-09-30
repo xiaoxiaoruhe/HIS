@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Annotation profile for his-java" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$PROJECT_DIR$/../../../Maven/maven_repository/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+          <entry name="$PROJECT_DIR$/../../../Maven/maven_repository/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
+          <entry name="$PROJECT_DIR$/../../../Maven/maven_repository/org/mapstruct/mapstruct-processor/1.6.3/mapstruct-processor-1.6.3.jar" />
+        </processorPath>
+        <module name="his-common" />
+        <module name="his-mcp-gateway" />
+        <module name="his-sample-ai" />
+        <module name="his-domain" />
+        <module name="his-pharmacy" />
+        <module name="his-oauth2" />
+        <module name="his-apis" />
+        <module name="his-sample-agent-travel" />
+        <module name="his-login" />
+        <module name="his-sample" />
+        <module name="his-gateway" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="his-apis" options="-parameters" />
+      <module name="his-common" options="-parameters" />
+      <module name="his-domain" options="-parameters" />
+      <module name="his-gateway" options="-parameters" />
+      <module name="his-java" options="-parameters" />
+      <module name="his-login" options="-parameters" />
+      <module name="his-mcp-gateway" options="-parameters" />
+      <module name="his-oauth2" options="-parameters" />
+      <module name="his-pharmacy" options="-parameters" />
+      <module name="his-sample" options="-parameters" />
+      <module name="his-sample-agent-travel" options="-parameters" />
+      <module name="his-sample-ai" options="-parameters" />
+    </option>
+  </component>
+</project>

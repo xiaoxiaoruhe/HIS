@@ -1,0 +1,28 @@
+spring:
+  cloud:
+    #nacos配置
+    #https://github.com/alibaba/spring-cloud-alibaba/blob/2025.0.x/spring-cloud-alibaba-examples/nacos-example/readme-zh.md
+    nacos:
+      server-addr: 127.0.0.1:8848
+      username: nacos
+      password: 123456
+      discovery:
+        namespace: fb84038b-8fac-44d8-8fd5-8dd0fd90cf22
+      config:
+        namespace: fb84038b-8fac-44d8-8fd5-8dd0fd90cf22
+
+#日志级别
+logging:
+  level:
+    root: info
+
+#开启MP SQL日志打印
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+knife4j:
+  # 开启增强配置
+  enable: true
+  # 开启生产环境屏蔽Swagger资源
+  production: true

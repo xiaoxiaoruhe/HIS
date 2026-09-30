@@ -1,0 +1,282 @@
+/*
+ * Copyright 2024-2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.alibaba.assistant.agent.autoconfigure.tools;
+
+import com.alibaba.assistant.agent.common.constant.CodeactStateKeys;
+import com.alibaba.assistant.agent.core.context.CodeContext;
+import com.alibaba.assistant.agent.core.executor.CodeactVariableProvider;
+import com.alibaba.assistant.agent.core.executor.GraalCodeExecutor;
+import com.alibaba.assistant.agent.core.model.ExecutionRecord;
+import com.alibaba.assistant.agent.core.model.GeneratedCode;
+import com.alibaba.assistant.agent.core.model.ToolCallRecord;
+import com.alibaba.cloud.ai.graph.OverAllState;
+import com.alibaba.cloud.ai.graph.agent.tools.ToolContextConstants;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.model.ToolContext;
+import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+
+/**
+ * Tool for executing generated code.
+ * Uses GraalCodeExecutor to run Python code in a sandboxed environment.
+ *
+ * @author Assistant Agent Team
+ * @since 1.0.0
+ */
+public class ExecuteCodeTool implements BiFunction<ExecuteCodeTool.Request, ToolContext, ExecuteCodeTool.Response> {
+
+	private static final Logger logger = LoggerFactory.getLogger(ExecuteCodeTool.class);
+
+	/**
+	 * ToolContext 中用于传递自定义变量的 key
+	 * 自定义变量会在代码执行前注入，作为全局变量可在函数中直接使用
+	 */
+	private static final String CODEACT_CUSTOM_VARIABLES_KEY = "codeact_custom_variables";
+
+	private final GraalCodeExecutor executor;
+	private final CodeContext codeContext;
+	private final CodeactVariableProvider variableProvider;
+
+	/**
+	 * 完整构造函数
+	 *
+	 * @param executor GraalCodeExecutor 实例
+	 * @param codeContext CodeContext 实例
+	 * @param variableProvider 变量提供者（可选，允许为 null）
+	 */
+	public ExecuteCodeTool(GraalCodeExecutor executor, CodeContext codeContext,
+						   CodeactVariableProvider variableProvider) {
+		this.executor = executor;
+		this.codeContext = codeContext;
+		this.variableProvider = variableProvider;
+		logger.info("ExecuteCodeTool#<init> 初始化完成, variableProvider={}",
+				variableProvider != null ? variableProvider.getClass().getSimpleName() : "null");
+	}
+
+	/**
+	 * 向后兼容构造函数（有 CodeContext，无 Provider）
+	 *
+	 * @param executor GraalCodeExecutor 实例
+	 * @param codeContext CodeContext 实例
+	 */
+	public ExecuteCodeTool(GraalCodeExecutor executor, CodeContext codeContext) {
+		this(executor, codeContext, null);
+	}
+
+	/**
+	 * 向后兼容构造函数（无 CodeContext，无 Provider）
+	 *
+	 * @param executor GraalCodeExecutor 实例
+	 */
+	public ExecuteCodeTool(GraalCodeExecutor executor) {
+		this(executor, null, null);
+	}
+
+	@Override
+	public Response apply(Request request, ToolContext toolContext) {
+		logger.info("ExecuteCodeTool#apply 执行代码请求: functionName={}, args={}",
+			request.functionName, request.args);
+
+		try {
+			// Get state from context
+			OverAllState state = (OverAllState) toolContext.getContext()
+				.get(ToolContextConstants.AGENT_STATE_CONTEXT_KEY);
+
+			if (state == null) {
+				throw new IllegalStateException("Agent state not found in tool context");
+			}
+
+			// Validate and log function information
+			if (codeContext != null) {
+				java.util.Optional<GeneratedCode> codeOpt = codeContext.getFunction(request.functionName);
+				if (codeOpt.isPresent()) {
+					GeneratedCode code = codeOpt.get();
+					logger.info("ExecuteCodeTool#apply 找到函数定义: functionName={}, signature={}, parameters={}",
+						code.getFunctionName(), code.getFunctionSignature(), code.getParameters());
+
+					// Validate parameters if available
+					if (code.getParameters() != null && !code.getParameters().isEmpty()) {
+						// Check if provided args match the expected parameters
+						if (request.args != null) {
+							for (String expectedParam : code.getParameters()) {
+								if (!request.args.containsKey(expectedParam)) {
+									logger.warn("ExecuteCodeTool#apply 缺少预期参数: {}, 提供的参数: {}",
+										expectedParam, request.args.keySet());
+								}
+							}
+							// Check for unexpected parameters
+							for (String providedParam : request.args.keySet()) {
+								if (!code.getParameters().contains(providedParam)) {
+									logger.warn("ExecuteCodeTool#apply 提供了未预期的参数: {}, 预期参数: {}",
+										providedParam, code.getParameters());
+								}
+							}
+						} else {
+							logger.warn("ExecuteCodeTool#apply 函数需要参数 {} 但未提供任何参数",
+								code.getParameters());
+						}
+					} else {
+						logger.info("ExecuteCodeTool#apply 函数使用灵活参数(**kwargs)，可接受任意参数");
+					}
+				} else {
+					logger.warn("ExecuteCodeTool#apply 在CodeContext中未找到函数: {}", request.functionName);
+				}
+			}
+
+			// 通过 Provider 获取自定义变量并注入到 ToolContext
+			ToolContext enrichedToolContext = enrichToolContextWithVariables(toolContext, state);
+
+			// Execute code with toolContext for CodeactTools
+			ExecutionRecord record = executor.execute(request.functionName, request.args, enrichedToolContext);
+
+			// Update state
+			updateState(state, record);
+
+			if (record.isSuccess()) {
+				logger.info("ExecuteCodeTool#apply 代码执行成功: functionName={}, result={}, replyToUserTraceSize={}",
+					request.functionName, record.getResult(), record.getReplyToUserTrace() != null ? record.getReplyToUserTrace().size() : 0);
+				return new Response(true, record.getResult(), null, record.getCallTrace(), record.getReplyToUserTrace(), !CollectionUtils.isEmpty(record.getReplyToUserTrace()), record.getDurationMs());
+			} else {
+				logger.error("ExecuteCodeTool#apply 代码执行失败: functionName={}, error={}",
+					request.functionName, record.getErrorMessage());
+				return new Response(false, null, record.getErrorMessage(), record.getCallTrace(), record.getReplyToUserTrace(), !CollectionUtils.isEmpty(record.getReplyToUserTrace()), record.getDurationMs());
+			}
+
+		} catch (Exception e) {
+			logger.error("ExecuteCodeTool#apply 代码执行异常", e);
+			return new Response(false, null, "Execution error: " + e.getMessage(), new ArrayList<>(), new ArrayList<>(), false, 0);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void updateState(OverAllState state, ExecutionRecord record) {
+		// Get or create execution_history list
+		List<ExecutionRecord> history = state.value(CodeactStateKeys.EXECUTION_HISTORY, List.class)
+			.map(list -> new ArrayList<>((List<ExecutionRecord>) list))
+			.orElse(new ArrayList<>());
+
+		// Add record
+		history.add(record);
+
+		// Update state
+		Map<String, Object> updates = Map.of(
+			CodeactStateKeys.EXECUTION_HISTORY, history,
+			CodeactStateKeys.CURRENT_EXECUTION, record
+		);
+		state.updateState(updates);
+
+		logger.debug("ExecuteCodeTool#updateState 执行历史已更新: count={}", history.size());
+	}
+
+	/**
+	 * 通过 Provider 获取变量并注入到 ToolContext
+	 *
+	 * <p>如果没有配置 Provider，直接返回原 Context（向后兼容）。
+	 *
+	 * @param originalContext 原始 ToolContext
+	 * @param state 当前 Agent 状态
+	 * @return 注入了自定义变量的 ToolContext
+	 */
+	private ToolContext enrichToolContextWithVariables(ToolContext originalContext, OverAllState state) {
+		// 如果没有配置 Provider，直接返回原 Context
+		if (variableProvider == null) {
+			logger.debug("ExecuteCodeTool#enrichToolContextWithVariables - reason=无Provider配置, 跳过变量注入");
+			return originalContext;
+		}
+
+		Map<String, Object> enrichedContextMap = new HashMap<>(originalContext.getContext());
+
+		try {
+			// 通过 Provider 获取所有自定义变量
+			Map<String, Object> customVariables = variableProvider.getVariables(state, originalContext);
+
+			if (customVariables != null && !customVariables.isEmpty()) {
+				enrichedContextMap.put(CODEACT_CUSTOM_VARIABLES_KEY, customVariables);
+				logger.info("ExecuteCodeTool#enrichToolContextWithVariables - reason=注入自定义变量, count={}, keys={}",
+						customVariables.size(), customVariables.keySet());
+			} else {
+				logger.debug("ExecuteCodeTool#enrichToolContextWithVariables - reason=Provider返回空变量集");
+			}
+		} catch (Exception e) {
+			logger.warn("ExecuteCodeTool#enrichToolContextWithVariables - reason=从Provider获取变量失败, error={}",
+					e.getMessage(), e);
+		}
+
+		return new ToolContext(enrichedContextMap);
+	}
+
+	/**
+	 * Request for executing code
+	 */
+	public static class Request {
+		@JsonProperty(required = true)
+		@JsonPropertyDescription("要执行的函数名称。" +
+			"必须与使用 write_code 工具生成代码时使用的函数名完全相同。" +
+			"可以通过检查 state 中的 generated_codes 来列出可用函数。")
+		public String functionName;
+
+		@JsonProperty
+		@JsonPropertyDescription("函数参数，以参数名到值的映射形式提供。" +
+			"参数名必须与生成函数时指定的参数完全匹配。" +
+			"示例：如果函数生成时参数为 ['a', 'b']，则使用 {\"a\": value1, \"b\": value2}。" +
+			"如果函数生成时没有指定特定参数（使用 **kwargs），可以传入任意参数。" +
+			"如果函数没有参数，请省略此字段或传入空对象 {}。" +
+			"值类型：字符串、数字（int/float）、布尔值、列表、字典/对象")
+		public Map<String, Object> args;
+
+		public Request() {
+		}
+
+		public Request(String functionName, Map<String, Object> args) {
+			this.functionName = functionName;
+			this.args = args;
+		}
+	}
+
+	/**
+	 * Response from executing code
+	 */
+	public static class Response {
+		public boolean success;
+		public String result;
+		public List<ToolCallRecord> callTrace;
+		public List<ToolCallRecord> replyToUserTrace;
+		public String error;
+		public long durationMs;
+		public boolean repliedToUser;
+
+		public Response() {
+		}
+
+		public Response(boolean success, String result, String error, List<ToolCallRecord> callTrace, List<ToolCallRecord> replyToUserTrace, boolean repliedToUser, long durationMs) {
+			this.success = success;
+			this.result = result;
+			this.callTrace = callTrace;
+			this.replyToUserTrace = replyToUserTrace;
+			this.error = error;
+			this.durationMs = durationMs;
+			this.repliedToUser = repliedToUser;
+		}
+	}
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/his-apis/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-domain/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-login/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-mcp-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-oauth2/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-pharmacy/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-sample-agent-travel/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-sample-ai/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/his-sample/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

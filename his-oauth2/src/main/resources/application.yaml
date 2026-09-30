@@ -1,0 +1,78 @@
+zo:
+  oauth2:
+    allowed-origins:
+      - "http://localhost:3000"
+      - "http://localhost:3001"
+      - "https://app.apifox.com"
+    mgr-id: "project-manager"
+    user-id: "project-app"
+
+server:
+  port: ${sp.auth}
+spring:
+  application:
+    name: ${sn.auth}
+  session:
+    # session超时时间
+    timeout: 3600s
+    redis:
+      # session命名空间
+      namespace: spring:session:oauth2
+  # 配置认证服务
+  security:
+    oauth2:
+      authorizationserver:
+        client:
+          # 管理端配置
+          mgr-client:
+            registration:
+              # 客户端id
+              client-id: ${zo.oauth2.mgr-id}
+              # 认证模式，授权码模式配置none
+              client-authentication-methods:
+                - "none"
+              # 授权模式
+              authorization-grant-types:
+                - "authorization_code"
+              # 登录成功前端回调地址
+              redirect-uris:
+                - "http://localhost:3000/signin-callback"
+                - "https://app.apifox.com/oauth2-browser-callback.html"
+              # 登出成功前端回调地址
+              post-logout-redirect-uris:
+                - "http://localhost:3000/"
+              # 授权范围
+              scopes:
+                - "openid"
+                - "profile"
+            token:
+              # 令牌有效期
+              access-token-time-to-live: 10h
+              # 刷新令牌有效期
+              refresh-token-time-to-live: 24h
+            # 是否需要用户确认授权
+            require-authorization-consent: false
+            # 单页应用使用PKCE支持
+            require-proof-key: true
+          # 用户端配置
+          user-client:
+            registration:
+              client-id: ${zo.oauth2.user-id}
+              client-authentication-methods:
+                - "none"
+              authorization-grant-types:
+                - "authorization_code"
+              redirect-uris:
+                - "http://localhost:3001/signin-callback"
+              post-logout-redirect-uris:
+                - "http://localhost:3001/"
+              scopes:
+                - "openid"
+                - "profile"
+            token:
+              access-token-time-to-live: 10h
+              refresh-token-time-to-live: 24h
+            require-authorization-consent: false
+            require-proof-key: true
+
+

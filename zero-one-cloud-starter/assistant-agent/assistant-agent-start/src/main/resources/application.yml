@@ -1,0 +1,115 @@
+# ============================================================================
+# Assistant Agent - Full Example Configuration
+# ============================================================================
+# This configuration demonstrates all available options with customizations.
+# ============================================================================
+
+spring:
+  application:
+    name: assistant-agent-full
+
+server:
+  port: 8080
+
+# ============================================================================
+# DashScope Configuration
+# ============================================================================
+spring.ai.dashscope:
+  api-key: ${DASHSCOPE_API_KEY}
+  chat:
+    options:
+      model: qwen-max
+
+# ============================================================================
+# Experience Module - with FastIntent enabled
+# ============================================================================
+spring.ai.alibaba.codeact.extension.experience:
+  enabled: true
+  fast-intent-enabled: true
+  fast-intent-react-enabled: true
+  fast-intent-code-enabled: true
+  fast-intent-allowed-tools:
+    - send_success_message
+    - send_error_message
+    - send_notification
+    - write_code
+    - write_condition_code
+  logging:
+    enabled: true
+
+experience:
+  console:
+    enabled: true
+
+# ============================================================================
+# Learning Module - with after-agent learning
+# ============================================================================
+spring.ai.alibaba.codeact.extension.learning:
+  enabled: true
+  online:
+    enabled: true
+    after-agent:
+      enabled: true
+      learning-types:
+        - experience
+
+# ============================================================================
+# Reply Module - with custom tools
+# ============================================================================
+spring.ai.alibaba.codeact.extension.reply:
+  enabled: true
+  tools:
+    - toolName: send_success_message
+      channelCode: IDE_TEXT
+      description: 向 IDE 控制台发送成功消息
+      reactEnabled: true
+      codeActEnabled: true
+      parameters:
+        - name: text
+          type: STRING
+          required: true
+          description: 成功消息的文本
+    - toolName: send_error_message
+      channelCode: IDE_TEXT
+      description: 向 IDE 控制台发送错误消息
+      reactEnabled: true
+      codeActEnabled: true
+      parameters:
+        - name: text
+          type: STRING
+          required: true
+          description: 错误消息的文本
+    - toolName: send_notification
+      channelCode: IDE_TEXT
+      description: 发送通知消息
+      reactEnabled: true
+      codeActEnabled: true
+      parameters:
+        - name: text
+          type: STRING
+          required: true
+          description: 通知的文本
+
+# ============================================================================
+# Evaluation Module - with input routing
+# ============================================================================
+spring.ai.alibaba.codeact.extension.evaluation:
+  enabled: true
+  input-routing:
+    enabled: true
+    suite-id: default-suite
+
+# ============================================================================
+# Prompt Contributor Module - 启用基于评估的 Prompt 贡献
+# ============================================================================
+spring.ai.alibaba.codeact.extension.prompt:
+  enabled: true
+  react:
+    enabled: true
+
+# ============================================================================
+# Logging - Debug level for development
+# ============================================================================
+logging:
+  level:
+    com.alibaba.assistant.agent: DEBUG

@@ -1,0 +1,78 @@
+server:
+  port: ${sp.gateway}
+spring:
+  application:
+    name: ${sn.gateway}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # 公钥文件配置
+          public-key-location: classpath:public.pem
+  cloud:
+    gateway:
+      server:
+        webflux:
+          #          # 动态创建路由的功能
+          #          # 路由规则是以微服务名称为前缀（如：/微服务名/真实路径），转发的的过程中会去掉前缀
+          #          # 注意自动路由优先级比较高，所以如果发现手动路由配置不生效，
+          #          # 通过指定一个较小的order值来保证手动路由生效。
+          #          # 一般情况下我们使用手动创建路由，这里只是给大家说明一下有这个功能，因为自己的服务模块可能会有特殊需求。
+          #          discovery:
+          #            locator:
+          #              enabled: true
+          #              lower-case-service-id: true
+          # 下面是手动创建路由路径配置
+          # 提示：
+          # predicates中如果要匹配多个地址前缀，每个前缀用,分割，如：- Path=/auth/**,/oauth/**
+          # filters中StripPrefix=1表示去掉Path中的第一个前缀
+          routes:
+            - id: oauth2-auth-route
+              uri: lb://${sn.auth}
+              predicates:
+                - Path=/auth/**
+              filters:
+                - StripPrefix=1
+            - id: login-route
+              uri: lb://${sn.login}
+              predicates:
+                - Path=/login/**
+
+zo:
+  cloud:
+    starter:
+      gateway:
+        # 配置是否开启鉴权
+        open-authorization: true
+        # 配置白名单路径
+        white-paths:
+          - "/actuator/**"
+          - "/captcha/**"
+          - "/auth/oauth2/token"
+          - "/login/auth-login"
+          - "/login/refresh-token"
+          - "/doc.html"
+          - "/v3/api-docs/**"
+          - "/*/v3/api-docs"
+          - "/webjars/**"
+        # 配置内部路径(需要用到凭证但不需要权限验证的请求)
+        inner-paths:
+          - "/login/current-user"
+          - "/login/get-menus"
+          - "/login/logout"
+          - "/chat/**"
+
+knife4j:
+  gateway:
+    # 开启gateway聚合组件，生产环境不开
+    enabled: false
+    # 指定服务发现的模式聚合微服务文档，并且是默认`default`分组
+    strategy: discover
+    discover:
+      enabled: true
+      # 指定版本号(Swagger2|OpenAPI3)
+      version: openapi3
+      # 需要排除的微服务
+      excluded-services:
+        - ${sn.gateway}
+        - ${sn.auth}

@@ -1,0 +1,67 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.zeroone.star</groupId>
+        <artifactId>zero-one-cloud-build</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+    <artifactId>his-java</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>awei</name>
+            <organization>Zero One Star</organization>
+        </developer>
+    </developers>
+    <repositories>
+        <repository>
+            <id>aliyun</id>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+    </repositories>
+    <modules>
+        <module>his-common</module>
+        <module>his-domain</module>
+        <module>his-apis</module>
+        <module>his-oauth2</module>
+        <module>his-gateway</module>
+        <module>his-login</module>
+        <module>his-mcp-gateway</module>
+        <module>his-pharmacy</module>
+        <module>his-sample-ai</module>
+        <module>his-sample</module>
+        <module>his-sample-agent-travel</module>
+    </modules>
+    <properties>
+        <!--  项目版本号  -->
+        <revision>1.0.0-SNAPSHOT</revision>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <!--  系统内容公用模块定义  -->
+            <dependency>
+                <groupId>com.zeroone.star</groupId>
+                <artifactId>his-apis</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeroone.star</groupId>
+                <artifactId>his-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zeroone.star</groupId>
+                <artifactId>his-domain</artifactId>
+                <version>${revision}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

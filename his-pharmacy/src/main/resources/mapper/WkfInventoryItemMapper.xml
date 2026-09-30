@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeroone.star.pharmacy.mapper.WkfInventoryItemMapper">
+    <!-- 物品标识，产品批号，库房标识确定唯一库存  -->
+    <select id="selectAllItemsByBusNo" resultType="com.zeroone.star.pharmacy.entity.WkfInventoryItem">
+        select *
+        from wkf_inventory_item
+        <where>
+            is_deleted = 0
+            <if test="itemId != null">
+                and item_id = #{itemId}
+            </if>
+            <if test="lotNumber != null">
+                and lot_number = #{lotNumber}
+            </if>
+            <if test="purposeLocationId != null">
+                and location_id = #{purposeLocationId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 更新库存数量(账面) -->
+    <update id="updateQuantity">
+        UPDATE wkf_inventory_item
+        SET quantity = #{quantity},
+        version = version + 1
+        WHERE id = #{id}
+    </update>
+</mapper>

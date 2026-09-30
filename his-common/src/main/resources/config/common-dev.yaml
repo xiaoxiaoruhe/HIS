@@ -1,0 +1,27 @@
+spring:
+  #nacos配置
+  #https://github.com/alibaba/spring-cloud-alibaba/blob/2025.0.x/spring-cloud-alibaba-examples/nacos-example/readme-zh.md
+  cloud:
+    nacos:
+      server-addr: 192.168.239.128:8848
+      username: nacos
+      password: nacos
+      discovery:
+        namespace: his-dev
+      config:
+        namespace: his-dev
+    sentinel:
+      transport:
+        #本机的IP地址，客户端给sentinel监控使用，不配置可能会识别成其他网卡的ip导致错误
+        client-ip: 192.168.1.10
+
+#开启MP SQL日志打印
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 开启调试日志方便查看错误信息
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG

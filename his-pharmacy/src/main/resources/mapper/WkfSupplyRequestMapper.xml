@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zeroone.star.pharmacy.mapper.WkfSupplyRequestMapper">
+
+<!--  查询当前busNo下的所有明细  -->
+    <select id="findAllItemsByBusNo" resultType="com.zeroone.star.pharmacy.entity.WkfSupplyRequest">
+        select *
+        from wkf_supply_request
+        <where>
+            is_deleted = 0
+            <if test="busNo != null">
+                and bus_no = #{busNo}
+            </if>
+        </where>
+    </select>
+
+<!--    提交审批更新状态为草稿状态   -->
+    <update id="updateStatusToDraft">
+        UPDATE wkf_supply_request
+        SET status_enum = #{statusEnum},
+        applicant_id = #{applicantId},
+        apply_time = #{applyTime},
+        version = version + 1
+        WHERE bus_no = #{busNo}
+        AND is_deleted = 0
+        AND status_enum = 'DRAFT'
+    </update>
+
+
+<!--    审批通过更新状态为已通过   -->
+    <update id="updateStatusToApproved">
+        UPDATE wkf_supply_request
+        SET status_enum = #{statusEnum},
+        approver_id = #{approverId},
+        approval_time = #{approvalTime},
+        version = version + 1
+        WHERE bus_no = #{busNo}
+        AND is_deleted = 0
+        AND status_enum = 'PENDING_APPROVAL'
+    </update>
+
+<!--    审批撤回更新状态为草稿并清空申请人与申请时间   -->
+    <update id="updateStatusToWithdraw">
+        UPDATE wkf_supply_request
+        SET status_enum = #{statusEnum},
+        applicant_id = NULL,
+        apply_time = NULL,
+        version = version + 1
+        WHERE bus_no = #{busNo}
+        AND is_deleted = 0
+        AND status_enum = 'PENDING_APPROVAL'
+    </update>
+
+<!--    审批驳回更新状态为已驳回并写入审批人、审批时间与驳回原因   -->
+    <update id="updateStatusToReject">
+        UPDATE wkf_supply_request
+        SET status_enum = #{statusEnum},
+        approver_id = #{approverId},
+        approval_time = #{approvalTime},
+        <if test="reason != null and reason != ''">
+        reason = #{reason},
+        </if>
+        version = version + 1
+        WHERE bus_no = #{busNo}
+        AND is_deleted = 0
+        AND status_enum = 'PENDING_APPROVAL'
+    </update>
+
+
+<!--    查询盘点单列表：按 bus_no 聚合，每个单据一条   -->
+    <select id="queryOrderList" resultType="com.zeroone.star.project.vo.pharmacy.InventoryOrderApprovalVO">
+        SELECT bus_no,
+               MAX(status_enum) AS status_enum,
+               MAX(created_by) AS created_by,
+               MAX(created_at) AS created_at,
+               MAX(approver_id) AS approver_id,
+               MAX(approval_time) AS updated_at,
+               SUM(COALESCE(total_price, 0)) AS total_price
+        FROM wkf_supply_request
+        WHERE is_deleted = 0
+        GROUP BY bus_no
+        ORDER BY MAX(created_at) DESC
+    </select>
+
+        <!--  查询最大单据号  -->
+    <select id="selectMaxBusNo" resultType="java.lang.String">
+        SELECT MAX(bus_no)
+        FROM wkf_supply_request
+        WHERE is_deleted = 0
+    </select>
+
+    <!--  删除单据下的草稿明细（覆盖式保存）  -->
+    <delete id="deleteDraftByBusNo">
+        DELETE FROM wkf_supply_request
+        WHERE bus_no = #{busNo}
+        AND is_deleted = 0
+        AND status_enum = 'DRAFT'
+    </delete>
+</mapper>

@@ -1,0 +1,58 @@
+# 应用版本描述
+application:
+  title: 零壹HIS
+  version: 1.0.0-SNAPSHOT
+  company: 01星球
+
+spring:
+  # 全局jackson配置
+  jackson:
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+  servlet:
+    multipart:
+      # 上传文件总的最大值
+      max-request-size: 20MB
+      # 单个文件的最大值
+      max-file-size: 10MB
+  # nacos配置
+  # https://github.com/alibaba/spring-cloud-alibaba/blob/2025.0.x/spring-cloud-alibaba-examples/nacos-example/readme-zh.md
+  config:
+    import:
+      # 根据当前激活的profile 动态导入common模块中对应的环境配置
+      - optional:classpath:config/common-${spring.profiles.active}.yaml
+      # 必须加载的系统配置
+      - nacos:system.yaml?refreshEnabled=true
+      - nacos:data-source.yaml?refreshEnabled=true
+      - nacos:third-services.yaml?refreshEnabled=true
+      - nacos:gateway.yaml?refreshEnabled=true
+      - nacos:key-config.yaml?refreshEnabled=true
+
+management:
+  # 端点检查
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  # 健康检查
+  endpoint:
+    health:
+      show-details: always
+
+# springdoc-openapi项目配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      display-name: ${spring.application.name}
+      paths-to-match: '/**'
+      packages-to-scan: com.zeroone.star
+  override-with-generic-response: false
+  default-flat-param-object: true

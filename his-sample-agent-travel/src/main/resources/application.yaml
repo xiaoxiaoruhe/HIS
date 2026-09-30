@@ -1,0 +1,54 @@
+server:
+  port: ${sp.ta}
+spring:
+  application:
+    name: ${sn.ta}
+  ai:
+    # 配置DashScope模型
+    dashscope:
+      api-key: ${AI_DASHSCOPE_API_KEY}
+      chat:
+        options:
+          # 模型类型，如：qwen-max、qwen-turbo、qwen-plus
+          model: glm-5.2
+          # 核采样温度, 取值范围[0.0,1.0]，越小越模型越严谨、保守、确定, 越大模型越有创造力、越活泼、越容易天马行空
+          temperature: 0.7
+          # 限制大模型单次回答你时最多能吐出多少个字（1000个Token在中文里大约相当于600-800个汉字）
+          max_tokens: 6000
+          # 核采样, 用来过滤掉那些太离谱、太奇怪的词, 取值范围[0.0,1.0], 为1表示不限制，所有的词都参与备选，越小模型越死板严谨
+          top_p: 0.9
+    # AI Alibaba相关配置
+    alibaba:
+      # 配置A2A模型
+      a2a:
+        nacos:
+          server-addr: ${spring.cloud.nacos.server-addr}
+          username: ${spring.cloud.nacos.username}
+          password: ${spring.cloud.nacos.password}
+          namespace: his-dev
+          registry:
+            # 启用服务注册（注册本地 Agent）
+            enabled: true
+        server:
+          version: 1.0.0
+          # 服务地址, 用于服务注册时指定主机地址
+          address: 192.168.1.9
+          card:
+            name: travel_agent
+            description: 专门旅行规划的智能体
+            # 提供者信息配置
+            provider:
+              # 提供商名称
+              organization: 01星球
+              # 提供商URL
+              url: https://space.bilibili.com/1653229811/
+    # 配置MCP
+    mcp:
+      client:
+        type: sync
+        name: a2a-mcp-client
+        sse:
+          connections:
+            12306-mcp:
+              url: https://mcp.api-inference.modelscope.net/9c5deda2b56346/
+              sse-endpoint: sse

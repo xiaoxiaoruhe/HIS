@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "example-app-center": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.example.com/app-center/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_TOKEN_HERE"
+      ]
+    },
+    "example-code-server": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.example.com/code/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_TOKEN_HERE"
+      ]
+    }
+  }
+}

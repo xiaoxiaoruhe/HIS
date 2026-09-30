@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "example-mcp-server": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.example.com/your-service/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_TOKEN_HERE"
+      ]
+    }
+  }
+}

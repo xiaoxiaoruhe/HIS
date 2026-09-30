@@ -1,0 +1,5 @@
+server:
+  port: ${sp.pharmacy}
+spring:
+  application:
+    name: ${sn.pharmacy}

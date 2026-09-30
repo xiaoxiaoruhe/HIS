@@ -1,0 +1,58 @@
+# Learning Module Configuration Example
+# 学习模块配置示例
+
+spring:
+  ai:
+    alibaba:
+      codeact:
+        extension:
+          learning:
+            # 启用学习模块
+            enabled: true
+
+            # 在线学习配置
+            online:
+              enabled: true
+
+              # Agent执行后学习
+              after-agent:
+                enabled: true
+                learning-types:
+                  - experience
+
+              # 模型调用后学习（可选）
+              after-model:
+                enabled: false
+
+              # 工具拦截器学习
+              tool-interceptor:
+                enabled: false
+                # 指定要监控的工具列表，为空表示监控所有工具
+                included-tools:
+                  - file_writer
+                  - code_executor
+
+            # 离线学习配置
+            offline:
+              enabled: false
+              tasks:
+                - task-name: experience_learning_task
+                  graph-name: experience_learning_graph
+                  schedule-mode: cron  # 可选: cron | interval
+                  cron-expression: "0 0 2 * * ?"  # 每天凌晨2点执行
+                  # interval-ms: 3600000  # 固定间隔模式：1小时（毫秒）
+                  lookback-period: 24  # 回看时间窗口（小时）
+
+            # 存储配置
+            storage:
+              # 存储类型：in-memory, store, custom
+              type: in-memory
+              default-namespace: default
+
+            # 异步学习配置
+            async:
+              enabled: true
+              thread-pool-size: 2
+              queue-capacity: 100
+              rejection-policy: caller-runs
+

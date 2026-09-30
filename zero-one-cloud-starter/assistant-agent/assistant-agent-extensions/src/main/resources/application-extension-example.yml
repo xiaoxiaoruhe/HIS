@@ -1,0 +1,74 @@
+# Spring AI Alibaba Codeact Extension Configuration Example
+
+# =================================================
+# 经验扩展模块配置
+# =================================================
+spring:
+  ai:
+    alibaba:
+      codeact:
+        extension:
+          # 经验模块配置
+          experience:
+            enabled: true                          # 是否启用经验扩展模块
+            data-source: memory                    # 数据源类型：memory 或 store
+            max-experience-count: 100             # 经验数据条数限制
+            namespace-prefix: experience/          # Store命名空间前缀
+            priority-strategy: latest              # 优先级策略：latest/frequent/scored
+
+          # 学习模块配置
+          learning:
+            enabled: true                          # 是否启用学习扩展模块
+            online-learning-enabled: true          # 是否启用在线学习
+            learning-frequency-limit: 5000         # 学习频率限制（毫秒）
+            after-agent-learning-enabled: true     # 是否启用AFTER_AGENT学习入口
+            after-model-learning-enabled: true     # 是否启用AFTER_MODEL学习入口
+            tool-interception-enabled: true        # 是否启用工具拦截学习
+            namespace-prefix: learning/             # Store命名空间前缀
+            max-sample-count: 1000                 # 学习样本最大保存数量
+
+          # 搜索模块配置
+          search:
+            enabled: true                          # 是否启用搜索扩展模块
+            project-context-enabled: true          # 是否启用项目上下文搜索
+            knowledge-search-enabled: true         # 是否启用知识库搜索
+            web-search-enabled: false              # 是否启用Web搜索
+            max-result-count: 10                   # 搜索结果最大数量
+            search-timeout: 30000                  # 搜索超时时间（毫秒）
+            namespace-prefix: search/               # Store命名空间前缀
+            merge-strategy: simple                  # 结果合并策略：simple/weighted/ranked
+
+          # 回复模块配置
+          reply:
+            enabled: true                          # 是否启用回复扩展模块
+            default-channel: IDE                   # 默认通道类型：IDE/CHAT_UI/IM/WEBHOOK
+            card-reply-enabled: true               # 是否启用卡片回复
+            text-reply-enabled: true               # 是否启用文本回复
+            notification-reply-enabled: true       # 是否启用通知回复
+            template-path: classpath:reply-templates/ # 回复模板路径
+            namespace-prefix: reply/               # Store命名空间前缀
+            reply-timeout: 10000                   # 回复超时时间（毫秒）
+
+# =================================================
+# 日志配置示例
+# =================================================
+logging:
+  level:
+    com.alibaba.assistant.agent.extension: DEBUG
+
+# =================================================
+# 最小可用配置示例
+# =================================================
+# spring:
+#   ai:
+#     alibaba:
+#       codeact:
+#         extension:
+#           experience:
+#             enabled: true
+#           learning:
+#             enabled: true
+#           search:
+#             enabled: true
+#           reply:
+#             enabled: true

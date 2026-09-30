@@ -1,0 +1,3 @@
+[submodule "assistant-agent"]
+	path = assistant-agent
+	url = https://gitee.com/xq-awei/AssistantAgent.git

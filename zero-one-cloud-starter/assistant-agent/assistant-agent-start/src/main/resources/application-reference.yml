@@ -1,0 +1,182 @@
+# ============================================================================
+# Assistant Agent - Full Configuration Reference
+# ============================================================================
+# This file documents ALL available configuration options.
+# Copy sections you need to application.yml and customize them.
+# ============================================================================
+
+spring:
+  application:
+    name: assistant-agent-app
+
+server:
+  port: 8080
+
+# ============================================================================
+# DashScope Configuration (Required)
+# ============================================================================
+spring.ai.dashscope:
+  api-key: ${DASHSCOPE_API_KEY}
+  chat:
+    options:
+      model: qwen-max          # Options: qwen-max, qwen-plus, qwen-turbo
+      # temperature: 0.7
+      # top-p: 0.8
+
+# ============================================================================
+# Experience Module
+# Default: enabled with in-memory storage
+# ============================================================================
+spring.ai.alibaba.codeact.extension.experience:
+  enabled: true                       # Master switch
+  code-experience-enabled: true       # Code generation experiences
+
+  # FastIntent - Quick response without full agent execution
+  fast-intent-enabled: false          # Default: disabled
+  fast-intent-react-enabled: true
+  fast-intent-code-enabled: true
+  fast-intent-allowed-tools: []       # Empty = no restriction
+
+  # Query limits
+  max-items-per-query: 5
+  max-content-length: 2000
+
+  # Storage: In-memory (default)
+  in-memory:
+    enabled: true
+    max-total-experiences: 1000
+    ttl-seconds: -1                   # -1 = never expire
+
+  # Storage: Store-based (optional, for persistence)
+  store:
+    enabled: false
+    namespace-prefix: experience
+
+  logging:
+    enabled: true
+
+# ============================================================================
+# Experience Management Console
+# Default: disabled unless the management module is on the classpath
+# ============================================================================
+experience:
+  console:
+    enabled: false                    # Enable /exp-console/
+    default-page-size: 20
+    base-path: /exp-console
+
+# ============================================================================
+# Learning Module
+# Default: enabled with after-agent learning
+# ============================================================================
+spring.ai.alibaba.codeact.extension.learning:
+  enabled: true                       # Master switch
+
+  online:
+    enabled: true
+    after-agent:                      # Learn after agent execution
+      enabled: true
+      learning-types:
+        - experience
+    after-model:                      # Learn after each model call
+      enabled: false
+    tool-interceptor:                 # Learn from tool executions
+      enabled: false
+      included-tools: []
+
+  offline:
+    enabled: false
+    tasks: []
+
+  async:
+    enabled: true
+    core-pool-size: 2
+    max-pool-size: 4
+    queue-capacity: 100
+
+# ============================================================================
+# Search Module
+# Default: enabled with project and knowledge search
+# ============================================================================
+spring.ai.alibaba.codeact.extension.search:
+  enabled: true
+  project-search-enabled: true
+  knowledge-search-enabled: true
+  web-search-enabled: false           # Requires API key
+  default-top-k: 10
+  search-timeout-ms: 5000
+
+# ============================================================================
+# Reply Module
+# Default: enabled with basic send_message tool
+# ============================================================================
+spring.ai.alibaba.codeact.extension.reply:
+  enabled: true
+  allow-config-override: true
+  tools:
+    - toolName: send_message
+      channelCode: DEFAULT
+      description: 向用户发送消息
+      reactEnabled: true
+      codeActEnabled: true
+      parameters:
+        - name: text
+          type: STRING
+          required: true
+          description: 消息文本
+
+# ============================================================================
+# Evaluation Module
+# Default: enabled with input routing
+# ============================================================================
+spring.ai.alibaba.codeact.extension.evaluation:
+  enabled: true
+  async: false
+  timeout-ms: 5000
+
+  input-routing:
+    enabled: true
+    suite-id: default-suite
+  model-output:
+    enabled: false
+    suite-id: model_output_quality_suite
+  code-execution:
+    enabled: false
+    suite-id: code_execution_suite
+  session-summary:
+    enabled: false
+    suite-id: session_summary_suite
+
+# ============================================================================
+# Trigger Module
+# Default: enabled
+# ============================================================================
+spring.ai.alibaba.codeact.extension.trigger:
+  enabled: true
+  scheduler:
+    pool-size: 2
+  execution:
+    timeout-seconds: 300
+
+# ============================================================================
+# MCP Client (Optional)
+# ============================================================================
+spring.ai.mcp.client:
+  enabled: false
+  name: assistant-agent-mcp
+  version: 1.0.0
+  type: SYNC
+  request-timeout: 30s
+  toolcallback:
+    enabled: true
+  # stdio:
+  #   servers-configuration: classpath:mcp-servers.json
+
+# ============================================================================
+# Logging
+# ============================================================================
+logging:
+  level:
+    com.alibaba.assistant.agent: INFO
+    # com.alibaba.assistant.agent: DEBUG
+    # org.springframework.ai: DEBUG

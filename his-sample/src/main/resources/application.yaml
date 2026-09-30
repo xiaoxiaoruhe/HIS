@@ -1,0 +1,8 @@
+server:
+  port: ${sp.sample}
+  servlet:
+    # 设置应用上下文路径
+    context-path: /sample
+spring:
+  application:
+    name: ${sn.sample}

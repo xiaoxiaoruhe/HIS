@@ -1,0 +1,58 @@
+server:
+  port: ${sp.mg}
+spring:
+  application:
+    name: ${sn.mg}
+  config:
+    import:
+      # 加载mcp网关配置文件
+      - nacos:mcp-gateway.yaml?refreshEnabled=true
+  ai:
+    # dashscope
+    dashscope:
+      api-key: ${AI_DASHSCOPE_API_KEY}
+      chat:
+        options:
+          # 模型类型，如：qwen-max、qwen-turbo、qwen-plus
+          model: glm-5.2
+          # 核采样温度, 取值范围[0.0,1.0]，越小越模型越严谨、保守、确定, 越大模型越有创造力、越活泼、越容易天马行空
+          temperature: 0.7
+          # 限制大模型单次回答你时最多能吐出多少个字（1000个Token在中文里大约相当于600-800个汉字）
+          max_tokens: 6000
+          # 核采样, 用来过滤掉那些太离谱、太奇怪的词, 取值范围[0.0,1.0], 为1表示不限制，所有的词都参与备选，越小模型越死板严谨
+          top_p: 0.9
+    # mcp服务端配置
+    mcp:
+      server:
+        name: mcp-nacos-gateway
+        version: 1.0.0
+        protocol: streamable
+        type: sync
+        instructions: "Nacos MCP Gateway - A tool gateway that aggregates multiple MCP Servers"
+        streamable-http:
+          mcp-endpoint: /mcp
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+#    # alibaba相关配置
+#    alibaba:
+#      mcp:
+#        # Nacos注册中心配置
+#        nacos:
+#          namespace: project-dev
+#          server-addr: 192.168.28.132:8848
+#          username: nacos
+#          password: nacos
+#          register:
+#            enabled: false
+#            host: 192.168.28.99
+#        # MCP Gateway配置
+#        gateway:
+#          enabled: true
+#          registry: nacos
+#          # 配置要发现和聚合的MCP Server服务名称
+#          nacos:
+#            service-names:
+#              - mcp-nacos-sample
