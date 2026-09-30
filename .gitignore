@@ -1,0 +1,19 @@
+# Default ignored files
+shelf/
+workspace.xml
+
+# Build outputs
+**/target/
+*.jar
+*.war
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+out/
+
+# Logs
+logs/
+*.log
